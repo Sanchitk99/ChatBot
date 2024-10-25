@@ -1,45 +1,48 @@
 import time
 import pyimagine
-
+import pyaudio
 
 current_time = time.strftime("%H:%M:%S", time.localtime())
 print(current_time)
 
+
 #For Opening Apps
 def AppOpen():
-    from AppOpener import open, close, mklist, give_appnames
-    print("1.Open App\n2.Close App")
+    from AppOpener import open
     choice = int(input())
-    if choice==1:
-        App=input("Enter App Name to open:")
-        try :
-            [open(App, match_closest=True)]
-        except:
-            print("No App with Name",App,"Available")
-    else:#To Close Any App
-        App = input("Enter App Name to close:")
-        try:
-            [close(App, match_closest=True)]
-        except:
-            print("No App with Name", App, "Available")
+    App = input("Enter App Name to open:")
+    try:
+        [open(App, match_closest=True)]
+    except:
+        print("No App with Name", App, "Available")
+def AppClose():
+    from AppOpener import close  #To Close Any App
+    App = input("Enter App Name to close:")
+    try:
+        [close(App, match_closest=True)]
+    except:
+        print("No App with Name", App, "Available")
+
+
 #AppOpen()
 
 # Function to convert text to speech
 def speak():
     import pyttsx3
     engine = pyttsx3.init()
-    text=input("Enter Your Text to Convert to Audio:")
+    text = input("Enter Your Text to Convert to Audio:")
     engine.setProperty("volume", 0.5)
-    engine.setProperty("rate",150)
+    engine.setProperty("rate", 150)
     engine.say(text)
     engine.runAndWait()
+
+
 #speak()
 
 # To Get Weather Forecast
 def weather():
     import requests
     from pyowm.owm import OWM
-
 
     # Your API key from OpenWeatherMap
     api_key = '87bb4a8443fd0ec621a73e5b390fcbb2'
@@ -55,11 +58,13 @@ def weather():
     if response.status_code == 200:
         data = response.json()
         main = data['main']
-        weather = data['weather'][0]
+        weathers = data['weather'][0]
         print(f"Temperature: {main['temp']}°C")
-        print(f"Weather: {weather['description']}")
+        print(f"Weather: {weathers['description']}")
     else:
         print("Error: Could not retrieve weather data")
+
+
 #weather()
 
 
@@ -67,19 +72,20 @@ def weather():
 def wikipedia():
     import webbrowser
     import wikipedia
-    wiki=input("What you want to search on Wikipedia? : ")
+    wiki = input("What you want to search on Wikipedia? : ")
     wikipedia.set_lang('en')
     search_results = wikipedia.search(wiki)
     print(search_results)
     page = wikipedia.page(wiki)
     print(wikipedia.summary(wiki, sentences=2))
-#if Want to Print in Webpage Details in Pycharm only
+    #if Want to Print in Webpage Details in Pycharm only
     # print(page.content)
     # print(page.title)
     url = page.url
     webbrowser.open_new(url)
-#wikipedia()
 
+
+#wikipedia()
 
 
 def news():
@@ -99,20 +105,26 @@ def news():
                 print(f"Description: {article['description']}\n")
         else:
             print("No articles found or invalid response structure")
+
+
 #news()
 
 
 import requests
 import webbrowser
+
+
 # Function to perform a Google search
 def google_search(query):
     url = "https://www.google.com/search"
     params = {"q": query}
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/53‌​7.36".encode('utf-8')}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/53‌​7.36".encode(
+            'utf-8')}
     response = requests.get(url, params=params, headers=headers)
     return response
-query =input("Enter Search Query : ")
-webbrowser.open_new( google_search(query).url)
+
+
 
 
 
@@ -121,8 +133,8 @@ def pyquiz():
     questions = {
         "Is List Mutable?": "True" or "Yes",
         "Who created Python ?": "Guido Van Rossum",
-        "What is 2*5**1*2?":"20",
-        "Which brackets are used for Tuple?":"()"
+        "What is 2*5**1*2?": "20",
+        "Which brackets are used for Tuple?": "()"
     }
 
     score = 0
@@ -135,5 +147,49 @@ def pyquiz():
             print(f"Wrong! The correct answer is {answer}.")
     print(f"Your score is {score}/{len(questions)}.")
 
-pyquiz()
+
+#pyquiz()
+def Working():
+#
+# import speech_recognition
+# import pyttsx3
+#
+# recognizer = speech_recognition.Recognizer()
+# while True:
+#
+#     try:
+#         with speech_recognition.Microphone() as mic:
+#             recognizer.adjust_for_ambient_noise(mic, duration=0.5)
+#             audio = recognizer.listen(mic)
+#
+#             text = recognizer.recognize_google(audio)
+#             text = text.lower().split()
+    text=input("Enter Your Choice:")
+
+    if text.lower()== "wikipedia":
+        wikipedia()
+    elif text.lower()== "news":
+        news()
+    elif text.lower()== "quiz":
+        pyquiz()
+    elif text.lower()== "text to audio":
+        speak()
+    elif text.lower()== "temperature" or "weather":
+        weather()
+    elif text.lower()== "google search":
+        query = input("Enter Search Query : ")
+        webbrowser.open_new(google_search(query).url)
+        google_search(query)
+    elif text.lower()== "open":
+        AppOpen()
+    elif text.lower()=="Close":
+        AppClose()
+
+            # print(f'Father: {text}')
+
+    # except speech_recognition.UnknownValueError:
+
+        # recognizer = speech_recognition.Recognizer()
+        # continue
+Working()
 
