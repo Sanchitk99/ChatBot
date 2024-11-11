@@ -5,7 +5,6 @@ import pyttsx3
 import self
 import speech_recognition as sr
 from hugchat import hugchat
-
 import requests
 import pyquotegen
 import webbrowser
@@ -18,12 +17,12 @@ from pydub import AudioSegment
 from pydub.playback import play
 import time
 from datetime import datetime
-
-
 from colored import fg, attr
-reset = attr('reset')  # Resets the Text Color to Default.
+from playsound import playsound
+reset = attr('reset')
 
-@eel.expose
+
+print(f"Current Time: {datetime.now().strftime('%H:%M:%S')}, Date: {datetime.now().strftime('%Y-%m-%d')}, Day: {datetime.now().strftime('%A')}")
 def takecommand():
     r = sr.Recognizer()
 
@@ -56,17 +55,18 @@ def playAssistantSound():
     play(sound)
 playAssistantSound()
 
-print(f"Current Time: {datetime.now().strftime('%H:%M:%S')}, Date: {datetime.now().strftime('%Y-%m-%d')}, Day: {datetime.now().strftime('%A')}")
 
 
 
 
-def chatBot(query):
+
+def chatbot(query):
     user_input = query.lower()
-    chatbot = hugchat.ChatBot(cookie_path=r"engine\cookies.json")  # Raw string for cleaner path handling
+    chatbot = hugchat.ChatBot(cookie_path=r"cookies.json")  # Raw string for cleaner path handling
     conversation_id = chatbot.new_conversation()
     chatbot.change_conversation(conversation_id)
     response = chatbot.chat(user_input)
+    print("Generating Response it will take some time......")
     print(response)
     # speak(response)
     return response
@@ -154,7 +154,7 @@ def spotify(self):
 # spotify(self)
 
 
-def spotify():
+def spotifyW():
     import spotipy
     from spotipy.oauth2 import SpotifyOAuth
     import webbrowser
@@ -169,27 +169,21 @@ def spotify():
                                                    client_secret=client_secret,
                                                    redirect_uri=redirect_uri,
                                                    scope='user-read-private user-read-email'))
-
+    Song=input("Enter Song Name: ").lower()
     def play_song(song_name):
-        if 'song please' in self.query or 'play some song' in self.query or 'could you play some song' in self.query:
-            speak('Sir what song should i play...')
-            song = takecommand()
         results = sp.search(q=song_name, type='track', limit=1)
         if results['tracks']['items']:
             track = results['tracks']['items'][0]
             track_url = track['external_urls']['spotify']
-            speak('Playing' + track)
+            speak('Playing' + Song)
             webbrowser.open(track_url)
 
             print(f"Opening '{track['name']}' by {track['artists'][0]['name']}' in your web browser.")
         else:
             print(f"No results found for '{song_name}'")
-spotify()
+    play_song(Song)
+# spotifyW()
 
-
-
-
-# To Get Weather Forecast
 def weather():
 #API key from OpenWeatherMap
     api_key = '87bb4a8443fd0ec621a73e5b390fcbb2'
@@ -207,8 +201,7 @@ def weather():
 #weather()
 
 
-#To Search on Wikipedia
-def MediaWiki():
+def mediawiki():
     import wikipedia
     wiki = input("What you want to search on Wikipedia? : ") or takecommand()
     print("What you want to search on Wikipedia? :")
@@ -294,27 +287,23 @@ def translate_text(text, dest_lang):
 
 def quote():
     quote = pyquotegen.get_quote("inspirational")
-#print(quote)
-import requests
-from playsound import playsound
-
+    #print(quote)
 
 print("Hey there! I'm Noobie, your virtual companion.")
-
 @eel.expose
 def get_response():
-    # self.query = takecommand().lower()
-
     text = input("Message Noobie :")
+    # self.query = takecommand().lower()
     if text.lower() == "wikipedia":
-        MediaWiki()
+        mediawiki()
     elif text.lower() == "news":
         news()
     elif text.lower() == "quiz":
         pyquiz()
     elif text.lower() == "text to audio":
-        speak(text)
-    elif text.lower in ["google search" or "google"]:
+        Para=input()
+        speak(Para)
+    elif text.lower == "google":
         query = input("Enter Search Query : ")
         webbrowser.open_new(google_search(query).url)
         google_search(query)
@@ -324,22 +313,22 @@ def get_response():
         closer()
     elif text.lower() == "audio to text":
         audiototext()
+    elif text.lower() in ["play song" ,"could you play some song" ,"play music" ,"can you play" , "song please"]:
+        spotifyW()
     elif text.lower() in ["translate" or "convert"]:
         message = input("Enter Text you want to translate: :")
-        print(translate_text(message, 'es'))
+        print(translate_text(message, 'Hi'))
     elif text.lower() in ["youtube" or "search youtube" or "youtube search"]:
         search = input("What you want to search? :")
         open_youtube_search(search)
-    elif text.lower in ["please play","play","can you play","song please","play some song","could you play some song"]:
-        spotify(self)
+    elif text.lower == ["spotify"]:
+        spotifyW()
     elif text in ["temperature", "weather", "climate"]:
         weather()
     else:
-        chatBot(text)
+        chatbot(text)
+
 while True:
     get_response()
-
-# Choice=int(input("Enter 1 to Continue\nEnter 2 to Exit\nEnter your Choice : "))
-
 
 
