@@ -1,4 +1,3 @@
-import eel
 import pyaudio
 import pyautogui
 import pyttsx3
@@ -9,6 +8,8 @@ import requests
 import pyquotegen
 import webbrowser
 import wikipedia
+import json
+from hugchat.hugchat import ChatBot
 from oauthlib.uri_validate import query
 from translate import Translator
 import speech_recognition
@@ -17,12 +18,13 @@ from pydub import AudioSegment
 from pydub.playback import play
 import time
 from datetime import datetime
-from colored import fg, attr
 from playsound import playsound
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+from colored import attr
 reset = attr('reset')
 
 
-print(f"Current Time: {datetime.now().strftime('%H:%M:%S')}, Date: {datetime.now().strftime('%Y-%m-%d')}, Day: {datetime.now().strftime('%A')}")
 def takecommand():
     r = sr.Recognizer()
 
@@ -53,21 +55,15 @@ def playAssistantSound():
     music= r"C:\Users\Sanchit\PycharmProjects\ChatBot\assets\audio\start_sound.mp3"
     sound = AudioSegment.from_file(music)
     play(sound)
-playAssistantSound()
+#playAssistantSound()
 
-
-
-
-
-
-def chatbot(query):
+def chatBot(query):
     user_input = query.lower()
-    chatbot = hugchat.ChatBot(cookie_path=r"cookies.json")  # Raw string for cleaner path handling
-    conversation_id = chatbot.new_conversation()
-    chatbot.change_conversation(conversation_id)
-    response = chatbot.chat(user_input)
-    print("Generating Response it will take some time......")
-    print(response)
+    chatbot = hugchat.ChatBot(cookie_path="engine/cookies.json")
+    id = chatbot.new_conversation()
+    chatbot.change_conversation(id)
+    response =  chatbot.chat(user_input)
+    print("Bot: "+response)
     # speak(response)
     return response
 
@@ -77,33 +73,31 @@ def open_youtube_search(query):
     search_url = base_url + urllib.parse.quote(query)
     webbrowser.open(search_url)
 # search = input("What you want to search?")
-# open_youtube_search(search)
+#open_youtube_search(search)
 
 
 def audiototext():
     recognizer = speech_recognition.Recognizer()
     while True:
-
         try:
             with speech_recognition.Microphone() as mic:
                 recognizer.adjust_for_ambient_noise(mic, duration=0.5)
                 audio = recognizer.listen(mic)
 
                 text = recognizer.recognize_google(audio)
-                print(f'Father: {text}')
+                print(f'Bot: {text}')
                 if text.lower()=="exit":
                     break
-                # get_response(text)
-
+                #get_response(text)
         except speech_recognition.UnknownValueError:
             recognizer = speech_recognition.Recognizer()
             continue
-# audiototext()
+#audiototext()
 
 
 def opener():
     from AppOpener import open
-    app = input("Enter App Name to open:")
+    app = input("Bot: Enter App Name to open:- ")
     try:
         [open(app, match_closest=True)]
     except FileNotFoundError:
@@ -113,11 +107,11 @@ def opener():
 
 def closer():
     from AppOpener import close  #To Close Any App
-    app = input("Enter App Name to close:")
+    app = input("Bot: Enter App Name to close:- ")
     try:
         [close(app, match_closest=True)]
     except FileNotFoundError:
-        print("No App with Name", app)
+        print("Bot:No App with Name", app)
 #closer()
 
 
@@ -132,44 +126,16 @@ def speak(text):
     engine.runAndWait()
 #speak()
 
-def spotify(self):
-    self.query = takecommand().lower()
-    # song
-    if 'song please' in self.query or 'play some song' in self.query or 'could you play some song' in self.query:
-        speak('Sir what song should i play...')
-        song = takecommand()
-
-
-    # spotify
-    elif 'play' in self.query or 'can you play' in self.query or 'please play' in self.query:
-        speak("OK! here you go!!")
-        self.query = self.query.replace("play", "")
-        self.query = self.query.replace("could you play", "")
-        self.query = self.query.replace("please play", "")
-        webbrowser.open(f'https://open.spotify.com/search/{self.query}')
-        time.sleep(19)
-        pyautogui.click(x=1055, y=617)
-        print('Enjoy!' + reset)
-        speak("Enjoy Sir!!")
-# spotify(self)
-
 
 def spotifyW():
-    import spotipy
-    from spotipy.oauth2 import SpotifyOAuth
-    import webbrowser
-
-    # Replace with your actual Client ID, Client Secret, and Redirect URI
     client_id = 'd7fd6fca60d54a86b156a58ed3be0ec0'
     client_secret = 'b3a5bac8aa644bb0bf63dea51c07b305'
     redirect_uri = 'http://localhost:8888/callback'
-
-    # Set up Spotify authentication
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=client_id,
                                                    client_secret=client_secret,
                                                    redirect_uri=redirect_uri,
                                                    scope='user-read-private user-read-email'))
-    Song=input("Enter Song Name: ").lower()
+    Song=input("Bot: Enter Song Name:- ").lower()
     def play_song(song_name):
         results = sp.search(q=song_name, type='track', limit=1)
         if results['tracks']['items']:
@@ -177,17 +143,15 @@ def spotifyW():
             track_url = track['external_urls']['spotify']
             speak('Playing' + Song)
             webbrowser.open(track_url)
-
             print(f"Opening '{track['name']}' by {track['artists'][0]['name']}' in your web browser.")
         else:
-            print(f"No results found for '{song_name}'")
+            print(f"Bot: No results found for '{song_name}'")
     play_song(Song)
 # spotifyW()
 
 def weather():
-#API key from OpenWeatherMap
     api_key = '87bb4a8443fd0ec621a73e5b390fcbb2'
-    city = input("Enter City :")
+    city = input("Bot: Enter City :- ")
     base_url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     response = requests.get(base_url)
     if response.status_code == 200:
@@ -202,38 +166,35 @@ def weather():
 
 
 def mediawiki():
-    import wikipedia
-    wiki = input("What you want to search on Wikipedia? : ") or takecommand()
-    print("What you want to search on Wikipedia? :")
+    wiki = input("Bot: What you want to search on Wikipedia? : ")
     wikipedia.set_lang('en')
-    search_results = wikipedia.search(wiki)
-    print(search_results)
-    page = wikipedia.page(wiki)
-    print(wikipedia.summary(wiki, sentences=2))
-    #if Want to Print in Webpage Details in Pycharm only
+    try:
+        search_results = wikipedia.search(wiki)
+        print(search_results)
+        page = wikipedia.page(wiki)
+        print(wikipedia.summary(wiki, sentences=2))
+        url = page.url
+        webbrowser.open_new(url)
+    except wikipedia.exceptions.PageError:
+        print("Could not find that page")
     # print(page.content)
     # print(page.title)
-    url = page.url
-    webbrowser.open_new(url)
 # MediaWiki()
 
 
 def news():
-    # API key from Generated using NewsAPI
     api_key = '26a0b568d79c4c91bef6041be8e0c694'
     url = f"https://newsapi.org/v2/top-headlines?country=us&apiKey={api_key}"
-    # Make the request to the API
     response = requests.get(url)
-    # Check if the request was successful
     if response.status_code == 200:
         data = response.json()
         if data['status'] == 'ok' and data['totalResults'] > 0:
-            articles = data['articles'][:10]  # Get the top 5 articles
+            articles = data['articles'][:5]
             for article in articles:
                 print(f"Title: {article['title']}")
                 print(f"Description: {article['description']}\n")
         else:
-            print("No articles found or invalid response structure")
+            print("Bot: No articles found or invalid response structure")
 #news()
 
 
@@ -248,23 +209,22 @@ def google_search(query):
 
 
 def pyquiz():
-    print("Let's Play A Python Quiz!!")
+    print("Bot: Let's Play A Python Quiz!!")
     questions = {
-        "Is List Mutable?": "True" or "Yes",
-        "Who created Python ?": "Guido Van Rossum",
-        "What is 2*5**1*2?": "20",
-        "Which brackets are used for Tuple?": "()"
+        "Bot: Is List Mutable?": "True" or "Yes" or "yes",
+        "Bot: Who created Python ?": "Guido Van Rossum",
+        "Bot: What is 2*5**1*2?": 20,
+        "Bot: Which brackets are used for Tuple?": "()"
     }
-
     score = 0
     for question, answer in questions.items():
         user_answer = input(question + " ")
         if user_answer.strip().lower() == answer.lower():
             score += 1
-            print("Correct!")
+            print("Bot: Correct!")
         else:
-            print(f"Wrong! The correct answer is {answer}.")
-    print(f"Your score is {score}/{len(questions)}.")
+            print(f"Bot: Wrong! The correct answer is {answer}.")
+    print(f"Bot: Your score is {score}/{len(questions)}.")
 #pyquiz()
 
 
@@ -272,61 +232,101 @@ def get_joke():
     response = requests.get("https://official-joke-api.appspot.com/random_joke")
     if response.status_code == 200:
         joke = response.json()
-        return f"{joke['setup']} - {joke['punchline']}"
+        return f"Bot: {joke['setup']} - {joke['punchline']}"
     else:
-        return "Couldn't fetch a joke at the moment."
-# print(get_joke())
+        return "Bot: Couldn't fetch a joke at the moment."
+#print(get_joke())
 
 
 def translate_text(text, dest_lang):
     translator = Translator(to_lang=dest_lang)
     translation = translator.translate(text)
-    return translation
-# print(translate_text(message, 'hi'))
+    return "Bot: " +translation
+#print(translate_text(message, 'hi'))
 
 
 def quote():
     quote = pyquotegen.get_quote("inspirational")
-    #print(quote)
+    print("Bot: "+quote)
+# quote()
 
-print("Hey there! I'm Noobie, your virtual companion.")
-@eel.expose
+
+from colored import fg, attr
+
+from colored import fg, attr
+
+from colored import fg, attr
+
+def Contents():
+    # Example of color-coded outputs
+    print(f"{fg('green')}Welcome to MultiTasking Chat Bot!!! I Can Tell and Do Anything....{attr('reset')}")
+    print(f"{fg('green')}1. Wikipedia{attr('reset')}")
+    print(f"{fg('green')}2. News{attr('reset')}")
+    print(f"{fg('green')}3. Quiz{attr('reset')}")
+    print(f"{fg('green')}4. Joke{attr('reset')}")
+    print(f"{fg('green')}5. Text to audio{attr('reset')}")
+    print(f"{fg('green')}6. Quote{attr('reset')}")
+    print(f"{fg('green')}7. Google Search{attr('reset')}")
+    print(f"{fg('green')}8. Open App{attr('reset')}")
+    print(f"{fg('green')}9. Close App{attr('reset')}")
+    print(f"{fg('green')}10. Audio to Text{attr('reset')}")
+    print(f"{fg('green')}11. Music{attr('reset')}")
+    print(f"{fg('green')}12. Translate{attr('reset')}")
+    print(f"{fg('green')}13. YouTube Search{attr('reset')}")
+    print(f"{fg('green')}14. Weather{attr('reset')}")
+    print(f"{fg('green')}15. Type Anything Else{attr('reset')}")
+def Time():
+    print(
+        f"Current Time: {datetime.now().strftime('%H:%M:%S')}, Date: {datetime.now().strftime('%Y-%m-%d')}, Day: {datetime.now().strftime('%A')}")
+
+
+Time()
+Contents()
 def get_response():
-    text = input("Message Noobie :")
-    # self.query = takecommand().lower()
-    if text.lower() == "wikipedia":
+    playAssistantSound()
+    blue = fg('blue')
+    Input = input(f"{blue}You: {reset}")
+    text=Input.strip()
+    if text.lower() in ["wikipedia","1"]:
         mediawiki()
-    elif text.lower() == "news":
+    elif text.lower() in ["news","2"]:
         news()
-    elif text.lower() == "quiz":
+    elif text.lower() in ["quiz","3"]:
         pyquiz()
-    elif text.lower() == "text to audio":
-        Para=input()
+    elif text.lower() in  ["4","joke", "tell me a joke" , "tell a joke","make me laugh",4]:
+        print(get_joke())
+    elif text.lower() in ["5","text to audio"]:
+        Para=input("Bot: Write your text to convert in audio: ")
         speak(Para)
-    elif text.lower == "google":
-        query = input("Enter Search Query : ")
+    elif text.lower() in ["6","quote"]:
+        quote()
+    elif text.lower() in ["7","google", "google search"]:
+        query = input("Bot: Enter Search Query : ")
         webbrowser.open_new(google_search(query).url)
         google_search(query)
-    elif text.lower() in ["open", "app", "open app"]:
+    elif text.lower() in ["8","open", "app", "open app"]:
         opener()
-    elif text.lower() in ["close" or "close app"]:
+    elif text.lower() in ["9","close" , "close app"]:
         closer()
-    elif text.lower() == "audio to text":
+    elif text.lower() in ["10","audio to text"]:
         audiototext()
-    elif text.lower() in ["play song" ,"could you play some song" ,"play music" ,"can you play" , "song please"]:
+    elif text.lower() in ["11","play song" ,"could you play some song" ,"play music" ,"can you play" , "song please","spotipy"]:
         spotifyW()
-    elif text.lower() in ["translate" or "convert"]:
+    elif text.lower() in ["12","translate" or "convert"]:
         message = input("Enter Text you want to translate: :")
-        print(translate_text(message, 'Hi'))
-    elif text.lower() in ["youtube" or "search youtube" or "youtube search"]:
-        search = input("What you want to search? :")
+        print(translate_text(message, 'hi'))
+    elif text.lower() in ["13","youtube" or "search youtube" or "youtube search"]:
+        search = input("Bot: What you want to search? :")
         open_youtube_search(search)
-    elif text.lower == ["spotify"]:
-        spotifyW()
-    elif text in ["temperature", "weather", "climate"]:
+    elif text.lower() in ["14","temperature", "weather", "climate"]:
         weather()
+    elif text.lower() in ['content']:
+        Contents()
+    elif text.lower() in ["0","quit"]:
+        quit()
     else:
-        chatbot(text)
+        chatBot(text)
+
 
 while True:
     get_response()
