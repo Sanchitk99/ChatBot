@@ -1,28 +1,43 @@
-import pyaudio
-import pyautogui
 import pyttsx3
-import self
 import speech_recognition as sr
-from hugchat import hugchat
-import requests
 import pyquotegen
 import webbrowser
-import wikipedia
-import json
-from hugchat.hugchat import ChatBot
-from oauthlib.uri_validate import query
-from translate import Translator
-import speech_recognition
 import urllib.parse
-from pydub import AudioSegment
-from pydub.playback import play
 import time
 from datetime import datetime
-from playsound import playsound
 import spotipy
+import random
+import pyquotegen
+import pyttsx3
+import requests
+import speech_recognition
+import wikipedia
+from colored import attr, fg
+from pydub import AudioSegment
+from pydub.playback import play
 from spotipy.oauth2 import SpotifyOAuth
-from colored import attr
+from translate import Translator
+
 reset = attr('reset')
+time_color = fg('green') 
+date_color = fg('blue') 
+day_color = fg('red')
+
+import hugchat
+from hugchat import hugchat
+
+def chatBot(query):
+    user_input = query.lower()
+    chatbot = hugchat.ChatBot(cookie_path="cookies.json")
+    id = chatbot.new_conversation()
+    chatbot.change_conversation(id)
+    response =  chatbot.chat(user_input)
+    print(response)
+    # speak(response)
+    return response
+# chatBot()
+
+
 
 
 def takecommand():
@@ -30,7 +45,6 @@ def takecommand():
 
     with sr.Microphone() as source:
         print('listening....')
-        # eel.DisplayMessage('listening....')
         r.pause_threshold = 1
         r.adjust_for_ambient_noise(source)
 
@@ -38,17 +52,13 @@ def takecommand():
 
     try:
         print('recognizing')
-        # eel.DisplayMessage('recognizing....')
         query = r.recognize_google(audio, language='en-in')
         print(f"You : {query}")
-        # eel.DisplayMessage(query)
         time.sleep(2)
-
     except Exception as e:
         return ""
-
     return query.lower()
-#takecommand()
+# takecommand()
 
 
 def playAssistantSound():
@@ -57,24 +67,12 @@ def playAssistantSound():
     play(sound)
 #playAssistantSound()
 
-def chatBot(query):
-    user_input = query.lower()
-    chatbot = hugchat.ChatBot(cookie_path="engine/cookies.json")
-    id = chatbot.new_conversation()
-    chatbot.change_conversation(id)
-    response =  chatbot.chat(user_input)
-    print("Bot: "+response)
-    # speak(response)
-    return response
-
-
 def open_youtube_search(query):
     base_url = "https://www.youtube.com/results?search_query="
     search_url = base_url + urllib.parse.quote(query)
     webbrowser.open(search_url)
 # search = input("What you want to search?")
 #open_youtube_search(search)
-
 
 def audiototext():
     recognizer = speech_recognition.Recognizer()
@@ -83,21 +81,20 @@ def audiototext():
             with speech_recognition.Microphone() as mic:
                 recognizer.adjust_for_ambient_noise(mic, duration=0.5)
                 audio = recognizer.listen(mic)
-
                 text = recognizer.recognize_google(audio)
-                print(f'Bot: {text}')
-                if text.lower()=="exit":
+                print(f'Text: {text}')
+                if text.lower()in ["exit","quit"]:
                     break
                 #get_response(text)
         except speech_recognition.UnknownValueError:
             recognizer = speech_recognition.Recognizer()
             continue
-#audiototext()
+# audiototext()
 
 
-def opener():
+def opener(app):
     from AppOpener import open
-    app = input("Bot: Enter App Name to open:- ")
+    # app = input("Bot: Enter App Name to open:- ")
     try:
         [open(app, match_closest=True)]
     except FileNotFoundError:
@@ -105,9 +102,9 @@ def opener():
 #opener()
 
 
-def closer():
+def closer(app):
     from AppOpener import close  #To Close Any App
-    app = input("Bot: Enter App Name to close:- ")
+    # app = input("Bot: Enter App Name to close:- ")
     try:
         [close(app, match_closest=True)]
     except FileNotFoundError:
@@ -149,6 +146,7 @@ def spotifyW():
     play_song(Song)
 # spotifyW()
 
+
 def weather():
     api_key = '87bb4a8443fd0ec621a73e5b390fcbb2'
     city = input("Bot: Enter City :- ")
@@ -167,18 +165,19 @@ def weather():
 
 def mediawiki():
     wiki = input("Bot: What you want to search on Wikipedia? : ")
-    wikipedia.set_lang('en')
+    # wikipedia.set_lang('en')
     try:
         search_results = wikipedia.search(wiki)
         print(search_results)
         page = wikipedia.page(wiki)
-        print(wikipedia.summary(wiki, sentences=2))
+        print(wikipedia.summary(wiki, sentences=5))
+        print(page.content)
         url = page.url
         webbrowser.open_new(url)
+        # print(page.content)
+        # print(page.title)
     except wikipedia.exceptions.PageError:
         print("Could not find that page")
-    # print(page.content)
-    # print(page.title)
 # MediaWiki()
 
 
@@ -211,9 +210,9 @@ def google_search(query):
 def pyquiz():
     print("Bot: Let's Play A Python Quiz!!")
     questions = {
-        "Bot: Is List Mutable?": "True" or "Yes" or "yes",
+        "Bot: Is List Mutable?":"True" or "Yes" or "yes",
         "Bot: Who created Python ?": "Guido Van Rossum",
-        "Bot: What is 2*5**1*2?": 20,
+        "Bot: What is 2*5**1*2?":"20",
         "Bot: Which brackets are used for Tuple?": "()"
     }
     score = 0
@@ -251,15 +250,8 @@ def quote():
 # quote()
 
 
-from colored import fg, attr
-
-from colored import fg, attr
-
-from colored import fg, attr
-
 def Contents():
-    # Example of color-coded outputs
-    print(f"{fg('green')}Welcome to MultiTasking Chat Bot!!! I Can Tell and Do Anything....{attr('reset')}")
+    print(f"{fg('green')}Welcome to MultiTasking Chat Bot!!!{attr('reset')}")
     print(f"{fg('green')}1. Wikipedia{attr('reset')}")
     print(f"{fg('green')}2. News{attr('reset')}")
     print(f"{fg('green')}3. Quiz{attr('reset')}")
@@ -269,25 +261,32 @@ def Contents():
     print(f"{fg('green')}7. Google Search{attr('reset')}")
     print(f"{fg('green')}8. Open App{attr('reset')}")
     print(f"{fg('green')}9. Close App{attr('reset')}")
-    print(f"{fg('green')}10. Audio to Text{attr('reset')}")
-    print(f"{fg('green')}11. Music{attr('reset')}")
-    print(f"{fg('green')}12. Translate{attr('reset')}")
-    print(f"{fg('green')}13. YouTube Search{attr('reset')}")
-    print(f"{fg('green')}14. Weather{attr('reset')}")
-    print(f"{fg('green')}15. Type Anything Else{attr('reset')}")
+    print(f"{fg('green')}10.Audio to Text{attr('reset')}")
+    print(f"{fg('green')}11.Music{attr('reset')}")
+    print(f"{fg('green')}12.Translate{attr('reset')}")
+    print(f"{fg('green')}13.YouTube Search{attr('reset')}")
+    print(f"{fg('green')}14.Weather{attr('reset')}")
+    print(f"{fg('green')}15.Quit{attr('reset')}")
 def Time():
-    print(
-        f"Current Time: {datetime.now().strftime('%H:%M:%S')}, Date: {datetime.now().strftime('%Y-%m-%d')}, Day: {datetime.now().strftime('%A')}")
-
-
+    print(f"{time_color}Current Time: {datetime.now().strftime('%H:%M:%S')}{reset}, " f"{date_color}Date: {datetime.now().strftime('%Y-%m-%d')}{reset}, " f"{day_color}Day: {datetime.now().strftime('%A')}{reset}")
 Time()
-Contents()
 def get_response():
     playAssistantSound()
     blue = fg('blue')
     Input = input(f"{blue}You: {reset}")
     text=Input.strip()
-    if text.lower() in ["wikipedia","1"]:
+    if text.lower() in["hello","hi","who are you?","good morning","hey","good evening",""]:
+        greetings = {
+            "hi": "Hello! How can I assist you today?",
+            "hello": "Hi there! What can I do for you?",
+            "hey": "Hey! How's it going?",
+            "good morning": "Good morning! How can I help you today?",
+            "good afternoon": "Good afternoon! What can I do for you?",
+            "good evening": "Good evening! How can I assist you?",
+        }
+        if text.lower() in greetings:
+            print(greetings[text.lower()])
+    elif text.lower() in ["wikipedia","1"]:
         mediawiki()
     elif text.lower() in ["news","2"]:
         news()
@@ -304,13 +303,23 @@ def get_response():
         query = input("Bot: Enter Search Query : ")
         webbrowser.open_new(google_search(query).url)
         google_search(query)
-    elif text.lower() in ["8","open", "app", "open app"]:
-        opener()
-    elif text.lower() in ["9","close" , "close app"]:
-        closer()
+    elif text.lower() in ["8","open app","open"]:
+        i=input("Enter the app name to open: ")
+        opener(i)
+    elif text.lower() in ["9","close app","close"]:
+        i=input("Enter the app name to close: ")
+        closer(i)
+    elif "close" in text.lower():
+        x = text.lower().replace("close", "")
+        y = x.strip()
+        closer(y)
+    elif "open" in text.lower():
+        x = text.lower().replace("open", "")
+        y = x.strip()
+        opener(y)
     elif text.lower() in ["10","audio to text"]:
         audiototext()
-    elif text.lower() in ["11","play song" ,"could you play some song" ,"play music" ,"can you play" , "song please","spotipy"]:
+    elif text.lower() in ["11","play song" ,"could you play some song" ,"play music" ,"can you play" , "song please","spotipy","music","song"]:
         spotifyW()
     elif text.lower() in ["12","translate" or "convert"]:
         message = input("Enter Text you want to translate: :")
@@ -322,13 +331,20 @@ def get_response():
         weather()
     elif text.lower() in ['content']:
         Contents()
-    elif text.lower() in ["0","quit"]:
+    elif text.lower() in ["0","quit","15"]:
+        goodbye_messages = [ "Goodbye for now! If you ever need anything or just want to chat,you know where to find me. Take care and have an amazing day ahead!",
+            "Farewell! It was great talking to you. Don't hesitate to reach out whenever you want. Stay awesome!",
+            "See you later! Remember, I'm always here if you need me. Have a fantastic day!", 
+            "Until next time! Take care, and feel free to come back anytime. You're always welcome here!", 
+            "Bye for now! I hope you have a wonderful day. Reach out whenever you need assistance!" ]
+        goodbye_message = random.choice(goodbye_messages)
+        print(goodbye_message)
         quit()
     else:
         chatBot(text)
-
-
+        # print("Sorry i couldn't understand your input, please try again!!!")
+        get_response()
 while True:
+    time.sleep(2)
+    Contents()
     get_response()
-
-
